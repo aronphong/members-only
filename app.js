@@ -70,7 +70,10 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.urlencoded({ extended: false}));
 
-app.get("/", (req, res) => res.render("index"));
+app.get("/", (req, res) => {
+    res.render("index", { user : req.user });
+});
+
 app.get("/sign-up", (req,res) => res.render("sign-up-form"));
 
 // handle user sign up on POST
@@ -94,5 +97,10 @@ app.post("/login", passport.authenticate("local", {
     successRedirect: "/",
     failureRedirect: "/"
 }));
+
+app.get("/logout", (req, res) => {
+    req.logout();
+    res.redirect("/")
+});
 
 app.listen(3000, () => console.log("app listening on PORT 3000!"));
