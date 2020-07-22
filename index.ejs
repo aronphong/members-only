@@ -7,6 +7,17 @@
 <body>
   <% if (user) {%>
     <h1>WELCOME BACK <%= user.username %></h1>
+    <form action="/create-post" method="POST">
+      <label for="message">Post to message board</label>
+      <input name="message" placeholder="enter message" type="text">
+      <button>Submit Post</button>
+    </form>
+
+    <% for (let i = 0; i < posts.length; i++) {%>
+      <p><%= posts[i].text %></p>
+      <p><%= posts[i].author %> </p>
+      </p><%= posts[i].date %> </p>
+    <% } %>
     <a href="/logout">LOG OUT</a>
   <% } else { %>
     <h1>please log in</h1>
@@ -16,6 +27,11 @@
       <label for="password">Password</label>
       <input name="password" type="password" />
       <button>Log In</button>
+
+      <% for (let i = 0; i < posts.length; i++) {%>
+        <p><%= posts[i].text %></p>
+      <% } %>
+ 
     </form>
   <% } %>
 </body>

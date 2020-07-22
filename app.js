@@ -15,22 +15,33 @@ const db = mongoose.connection;
 db.on("error", console.error.bind(console, "mongo connection error"));
 
 const User = mongoose.model(
-    "User",
-    new Schema({
-        first_name: { type: String },
-        last_name: { type: String },
-        username: { type: String },
-        password: { type: String },
-        membership_status: { type: Boolean },
-        post: [
-            {
-                title: { type: String },
-                text: { type: String },
-                date: {}
-            }
-        ]
-    })    
+  "User",
+  new Schema({
+      admin: {type: Boolean },
+      first_name: { type: String, required: true },
+      last_name: { type: String, required: true },
+      username: { type: String, required: true },
+      password: { type: String, required: true },
+      membership_status: { type: String },
+      post: [
+          {
+              title: { type: String },
+              text: { type: String },
+              date: {}
+          }
+      ]
+  })    
 );
+
+const Post = mongoose.model(
+  "Post",
+  new Schema({
+    // title: { type: String },
+    text: { type: String },
+    author: { type: String },
+    date: {}
+  })
+)
 
 const app = express();
 app.set("views", __dirname);
@@ -54,15 +65,15 @@ passport.use(
     })
   );
 
-  passport.serializeUser(function(user, done) {
-    done(null, user.id);
+passport.serializeUser(function(user, done) {
+  done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+  User.findById(id, function(err, user) {
+    done(err, user);
   });
-  
-  passport.deserializeUser(function(id, done) {
-    User.findById(id, function(err, user) {
-      done(err, user);
-    });
-  });
+});
 
 
 app.use(session({ secret: "cats", resave: false, saveUninitialized: true }));
@@ -70,9 +81,16 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.urlencoded({ extended: false}));
 
-app.get("/", (req, res) => {
-    res.render("index", { user : req.user });
+// handle posts on GET
+app.get("/", (req, res, next) => {
+
+  // get all user posts from db
+  Post.find({}).exec((err, posts) => {
+    if (err) next(err);
+    res.render("index", { user : req.user, posts: posts });
+  });
 });
+
 
 app.get("/sign-up", (req,res) => res.render("sign-up-form"));
 
@@ -97,6 +115,20 @@ app.post("/login", passport.authenticate("local", {
     successRedirect: "/",
     failureRedirect: "/"
 }));
+
+app.post("/create-post", (req, res, next) => {
+  const post = new Post ({
+    text: req.body.message,
+    author: req.user.username,
+    date: new Date(Date.now()).toDateString()
+
+  });
+
+  post.save(err => {
+    if (err) next(err);
+    res.redirect("/");
+  })
+});
 
 app.get("/logout", (req, res) => {
     req.logout();
