@@ -2,34 +2,43 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <link rel="stylesheet" href="./public/reset.css" type="text/css">
+  <link rel="stylesheet" href="./public//style.css" type="text/css">
   <title></title>
 </head>
 <body>
   <% if (user) {%>
-    <h1>WELCOME BACK <%= user.username %></h1>
+  <div>
+    <h1>WELCOME <%= user.username %>!</h1>
     <form action="/create-post" method="POST">
       <label for="message">Post to message board</label>
       <input name="message" placeholder="enter message" type="text">
       <button>Submit Post</button>
     </form>
-
+  </div>
     <% for (let i = 0; i < posts.length; i++) {%>
-      <p><%= posts[i].text %></p>
-      <p><%= posts[i].author %> </p>
-      </p><%= posts[i].date %> </p>
+      <div class="posts">
+        <p><%= posts[i].text %></p>
+        <p>Author: <%= posts[i].author %> </p>
+        <p>Date Posted: <%= posts[i].date %> </p>
+      </div>
     <% } %>
     <a href="/logout">LOG OUT</a>
   <% } else { %>
-    <h1>please log in</h1>
-    <form action="/login" method="POST">
-      <label for="username">Username</label>
-      <input name="username" placeholder="username" type="text" />
-      <label for="password">Password</label>
-      <input name="password" type="password" />
-      <button>Log In</button>
-
+    <div>
+      <h1>please log in</h1>
+      <form action="/login" method="POST">
+        <label for="username">Username</label>
+        <input name="username" placeholder="username" type="text" />
+        <label for="password">Password</label>
+        <input name="password" type="password" />
+        <button>Log In</button>
+    </div>
       <% for (let i = 0; i < posts.length; i++) {%>
-        <p><%= posts[i].text %></p>
+        <div class="posts">
+          <p><%= posts[i].text %></p>
+        </div>
+        
       <% } %>
  
     </form>
