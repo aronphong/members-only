@@ -57,9 +57,15 @@ passport.use(
         if (!user) {
           return done(null, false, { msg: "Incorrect username" });
         }
-        if (user.password !== password) {
-          return done(null, false, { msg: "Incorrect password" });
-        }
+        bcrypt.compare(password, user.password, (err, res) => {
+          if (res) {
+            // passwords math! log user in
+            return done(null, user)
+          } else {
+            // passwords do not match!
+            return done(null, false, { msg: "Incorrect password" })
+          }
+        })
         return done(null, user);
       });
     })
@@ -80,6 +86,7 @@ app.use(session({ secret: "cats", resave: false, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.urlencoded({ extended: false}));
+app.use('/public', express.static('public'));
 
 // handle posts on GET
 app.get("/", (req, res, next) => {
@@ -103,12 +110,15 @@ app.post("/sign-up", (req, res, next) => {
         last_name: req.body.lastname
     });
 
-    user.save(err => {
+    bcrypt.hash(user.password, 10, (err, hashedPassWord) => {
+      if (err) next(err);
+      user.password = hashedPassWord
+      user.save(err => {
         if (err) next(err);
-        res.redirect("/")
-    })
-    // console.log(user);
-})
+        res.redirect("/");
+      });
+    });
+});
 
 // handle user log in on POST
 app.post("/login", passport.authenticate("local", {
